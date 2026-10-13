@@ -1,0 +1,2231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timesfile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* ========== Spline Design System v2.1 ========== */
+:root {
+  --color-void-black: #000;
+  --color-bright-white: #fff;
+  --color-cloud: #ccc;
+  --color-silver: #999;
+  --color-spline-blue: #0062ff;
+  --color-neon-pink: #ff5cab;
+  --color-golden-orb: #ffb01f;
+  --color-violet-haze: #a770ff;
+  --color-emerald-glow: #47b35f;
+  --surface-panel: rgba(255,255,255,0.08);
+  --surface-interactive: rgba(255,255,255,0.15);
+  --surface-hover: rgba(255,255,255,0.12);
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --radius-cards: 24px;
+  --radius-buttons: 12px;
+  --radius-pills: 99px;
+  --radius-smallpanels: 16px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; }
+body {
+  font-family: var(--font-sans);
+  background: var(--color-void-black);
+  color: var(--color-bright-white);
+  height: 100vh;
+  display: flex;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ========== Welcome Page ========== */
+.welcome-page {
+  position: fixed; inset: 0;
+  background: #0A0A0F;
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 2000; padding: 32px;
+}
+.welcome-page.active { display: flex; }
+.welcome-mascot {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  width: 100%; max-width: 640px; overflow: hidden;
+  margin-bottom: 20px;
+}
+.welcome-mascot img {
+  width: 100%; height: auto; max-height: 100%; display: block;
+  object-fit: contain; border-radius: 16px;
+}
+.welcome-title {
+  font-size: 48px; font-weight: 600; letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #0062ff 0%, #8b5cf6 50%, #ff5cab 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 12px;
+}
+.welcome-cta-btn {
+  background: var(--color-spline-blue); color: var(--color-bright-white);
+  border: none; border-radius: var(--radius-pills);
+  padding: 14px 44px; font-size: 16px; font-weight: 500;
+  font-family: var(--font-sans); cursor: pointer; transition: all .2s;
+  display: inline-flex; align-items: center; gap: 8px;
+  flex-shrink: 0;
+}
+.welcome-cta-btn:hover { background: #0052d4; transform: translateY(-1px); }
+
+/* ========== Mode Select Page ========== */
+.mode-page {
+  position: fixed; inset: 0; background: var(--color-void-black);
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 2000; padding: 24px;
+}
+.mode-page.active { display: flex; }
+
+.mode-card {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-cards); padding: 32px 28px; width: 100%;
+  max-width: 420px; cursor: pointer; transition: all .25s; margin-bottom: 16px;
+}
+.mode-card:hover { border-color: var(--color-spline-blue); background: rgba(0,98,255,0.06); }
+.mode-card--selected {
+  border-color: var(--color-spline-blue) !important;
+  background: rgba(0,98,255,0.08) !important;
+  box-shadow: 0 0 30px rgba(0,98,255,0.1);
+}
+.mode-card-icon { font-size: 36px; margin-bottom: 12px; }
+.mode-card-title { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+.mode-card-desc { font-size: 13px; color: var(--color-silver); line-height: 1.5; }
+
+.mode-time-row { display: flex; gap: 16px; align-items: center; margin-bottom: 20px; }
+.mode-time-group { flex: 1; }
+.mode-time-label { font-size: 12px; color: var(--color-silver); margin-bottom: 6px; }
+
+.mode-time-select {
+  width: 100%; padding: 10px 8px; background: var(--surface-panel);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-buttons);
+  color: var(--color-bright-white); font-size: 16px; font-family: var(--font-sans);
+  outline: none; text-align: center; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+}
+.mode-time-select:focus { border-color: var(--color-spline-blue); }
+.mode-time-select option { background: #111; }
+
+.mode-pool-info {
+  text-align: center; font-size: 14px; color: var(--color-cloud);
+  padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 20px;
+}
+.mode-pool-val { color: var(--color-spline-blue); font-weight: 600; }
+.mode-time-error { color: var(--color-neon-pink); font-size: 12px; margin-bottom: 12px; display: none; }
+
+.mode-confirm-btn {
+  width: 100%; background: var(--color-spline-blue); color: var(--color-bright-white);
+  border: none; border-radius: var(--radius-pills); padding: 14px;
+  font-size: 16px; font-weight: 500; font-family: var(--font-sans); cursor: pointer;
+  transition: all .2s; display: none;
+}
+.mode-confirm-btn:hover { background: #0052d4; }
+.mode-confirm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.mode-back-btn {
+  background: transparent; color: var(--color-silver); border: none;
+  width: 36px; height: 36px; font-size: 14px; font-family: var(--font-sans);
+  cursor: pointer; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  opacity: 0.5; transition: all .2s;
+}
+.mode-back-btn:hover { opacity: 1; color: var(--color-bright-white); background: var(--surface-hover); }
+
+/* ========== Layout ========== */
+.app-container {
+  max-width: 800px; margin: 0 auto; padding: 24px 20px;
+  height: 100%; display: none; flex-direction: column; flex: 1;
+}
+.app-container.active { display: flex; }
+
+/* ========== Header ========== */
+.app-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 0; margin-bottom: 20px;
+  border-bottom: 1px solid var(--surface-panel);
+}
+.app-title {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 20px; font-weight: 500; letter-spacing: -0.01em;
+}
+.app-logo { width: 36px; height: 36px; flex-shrink: 0; }
+.app-logo svg { width: 100%; height: 100%; display: block; }
+.header-actions { display: flex; gap: 8px; }
+
+/* ========== Buttons ========== */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: none; border-radius: var(--radius-buttons);
+  font-family: var(--font-sans); font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all .2s; padding: 10px 20px;
+}
+.btn-primary { background: var(--color-spline-blue); color: var(--color-bright-white); }
+.btn-primary:hover { background: #0052d4; }
+.btn-ghost { background: transparent; color: var(--color-cloud); }
+.btn-ghost:hover { background: var(--surface-hover); color: var(--color-bright-white); }
+.btn-sm { padding: 8px 14px; font-size: 13px; }
+.btn-icon { padding: 8px; border-radius: 50%; min-width: 36px; justify-content: center; }
+.btn-danger { background: rgba(255,92,171,0.15); color: var(--color-neon-pink); }
+.btn-danger:hover { background: rgba(255,92,171,0.25); }
+.btn-warn { background: rgba(255,176,31,0.15); color: var(--color-golden-orb); }
+.btn-warn:hover { background: rgba(255,176,31,0.25); }
+
+/* ========== Warning Tip ========== */
+.warning-tip {
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-smallpanels); padding: 10px 16px;
+  margin-bottom: 16px; font-size: 12px; color: rgba(255,255,255,0.5);
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ========== Multi-task Toggle ========== */
+.multitask-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; background: var(--surface-panel);
+  border-radius: var(--radius-smallpanels); margin-bottom: 16px;
+}
+.multitask-label {
+  display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--color-cloud);
+}
+.multitask-icon {
+  position: relative; cursor: help; color: var(--color-silver); font-size: 14px;
+}
+.multitask-icon:hover { color: var(--color-bright-white); }
+
+/* Toggle switch */
+.toggle-switch {
+  position: relative; width: 44px; height: 24px; flex-shrink: 0;
+}
+.toggle-switch input { display: none; }
+.toggle-slider {
+  position: absolute; inset: 0; background: var(--surface-interactive);
+  border-radius: var(--radius-pills); cursor: pointer; transition: all .2s;
+}
+.toggle-slider::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 20px; height: 20px; background: var(--color-bright-white);
+  border-radius: 50%; transition: all .2s;
+}
+.toggle-switch input:checked + .toggle-slider { background: var(--color-spline-blue); }
+.toggle-switch input:checked + .toggle-slider::after { left: 22px; }
+
+/* ========== Task Area Wrapper ========== */
+.task-area-wrapper {
+  background: var(--surface-card); border-radius: var(--radius-panels);
+  padding: 16px; margin-bottom: 16px;
+  border: 1px solid var(--border-subtle);
+}
+.task-area-wrapper .status-tabs {
+  margin: -16px -16px 12px -16px; padding: 8px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.task-status-running {
+  font-size: 13px; color: var(--color-spline-blue); padding: 8px 12px;
+  background: rgba(0,98,255,0.06); border-radius: var(--radius-smallpanels);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+}
+/* ========== Status Tabs ========== */
+.status-tabs {
+  display: flex; gap: 4px; margin-bottom: 16px;
+  background: var(--surface-panel); border-radius: var(--radius-buttons);
+  padding: 4px;
+}
+.status-tab {
+  flex: 1; padding: 8px 16px; border: none; background: transparent;
+  color: var(--color-silver); font-size: 13px; font-family: var(--font-sans);
+  cursor: pointer; border-radius: 8px; transition: all .2s; font-weight: 500;
+}
+.status-tab:hover { color: var(--color-bright-white); }
+.status-tab--active {
+  background: var(--color-spline-blue); color: var(--color-bright-white);
+}
+.status-tab-count {
+  font-size: 11px; opacity: 0.7; margin-left: 4px;
+}
+
+/* ========== Time Axis Bar ========== */
+.time-axis-section {
+  background: var(--surface-panel); border-radius: var(--radius-cards);
+  padding: 24px; margin-bottom: 20px;
+}
+.time-axis-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px;
+}
+.time-axis-label { font-size: 13px; color: var(--color-silver); font-weight: 500; }
+.time-axis-work-hours { font-size: 13px; color: var(--color-cloud); }
+.time-axis-mode {
+  font-size: 11px; padding: 2px 8px; border-radius: var(--radius-pills);
+  background: rgba(0,98,255,0.15); color: #7aacff;
+}
+.time-axis-mode.efficiency { background: rgba(167,112,255,0.15); color: var(--color-violet-haze); }
+
+.time-axis-track {
+  position: relative; height: 48px;
+  background: rgba(255,255,255,0.03); border-radius: var(--radius-pills);
+  overflow: hidden; border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: inset 0 0 20px rgba(0,98,255,0.03); display: flex;
+}
+.time-axis-used {
+  height: 100%; background: rgba(255,255,255,0.12);
+  transition: width 0.5s ease; flex-shrink: 0;
+}
+.time-axis-remaining {
+  height: 100%; background: linear-gradient(90deg, #0062ff, #4d8cff);
+  transition: width 0.5s ease; flex-shrink: 0;
+  box-shadow: 0 0 20px rgba(0,98,255,0.3), 0 0 60px rgba(0,98,255,0.1);
+}
+.time-axis-used.overtime {
+  background: linear-gradient(90deg, #0062ff, #ff5cab);
+  box-shadow: 0 0 20px rgba(255,92,171,0.3), 0 0 60px rgba(255,92,171,0.1);
+}
+
+.time-axis-stats {
+  display: flex; justify-content: space-between; margin-top: 12px;
+  font-size: 12px; color: var(--color-silver);
+}
+.time-axis-stat { display: flex; align-items: center; gap: 4px; }
+.time-axis-stat .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.dot-blue { background: var(--color-spline-blue); }
+.dot-pink { background: var(--color-neon-pink); }
+.dot-dim { background: var(--color-silver); }
+
+/* ========== Task Cards ========== */
+.task-section-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px;
+}
+.task-section-title { font-size: 16px; font-weight: 500; }
+.task-count { font-size: 13px; color: var(--color-silver); }
+
+.task-list { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+
+.card {
+  background: var(--surface-panel); border-radius: var(--radius-cards);
+  padding: 20px; cursor: pointer; transition: all .25s;
+  position: relative; border: 1px solid transparent;
+}
+.card:hover { background: var(--surface-hover); }
+
+.card--running {
+  border-color: var(--color-spline-blue);
+  background: linear-gradient(135deg, rgba(0,98,255,0.12) 0%, rgba(0,98,255,0.06) 100%);
+  box-shadow: 0 0 0 1px rgba(0,98,255,0.3), 0 0 30px rgba(0,98,255,0.1), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.card--running::before {
+  content: ''; position: absolute; left: 0; top: 16px; bottom: 16px;
+  width: 4px; background: linear-gradient(180deg, var(--color-spline-blue), #4d8cff);
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 12px rgba(0,98,255,0.5);
+}
+.card--running .card-name { color: #7aacff; }
+.card--running .card-time {
+  color: var(--color-bright-white); text-shadow: 0 0 20px rgba(0,98,255,0.3);
+}
+.card--paused { opacity: 0.85; }
+
+.card-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px;
+}
+.card-name { font-size: 15px; font-weight: 500; }
+
+.card-body { margin-bottom: 12px; }
+.card-time { font-size: 28px; font-weight: 500; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+.card-label { font-size: 12px; color: var(--color-silver); margin-top: 2px; }
+.card-desc { font-size: 12px; color: rgba(255,255,255,0.35); margin-top: 6px; font-style: italic; }
+.card-overtime { font-size: 13px; color: var(--color-neon-pink); margin-top: 4px; }
+
+.card-actions {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06);
+}
+.adjust-group { display: flex; gap: 6px; }
+.btn-adjust {
+  background: var(--surface-interactive); color: var(--color-cloud);
+  border: none; border-radius: 8px; padding: 4px 10px;
+  font-size: 12px; cursor: pointer; transition: all .2s; font-family: var(--font-sans);
+}
+.btn-adjust:hover { background: rgba(255,255,255,0.25); color: var(--color-bright-white); }
+.btn-delete {
+  background: transparent; color: var(--color-silver); border: none;
+  padding: 6px; cursor: pointer; border-radius: 8px; font-size: 14px; transition: all .2s;
+}
+.btn-delete:hover { background: rgba(255,92,171,0.15); color: var(--color-neon-pink); }
+
+/* ========== Status Bar ========== */
+/* ========== Modal ========== */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  display: none; align-items: center; justify-content: center;
+  z-index: 1000; backdrop-filter: blur(4px);
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: #111; border-radius: var(--radius-cards);
+  padding: 32px; width: 90%; max-width: 460px; max-height: 90vh;
+  overflow-y: auto; border: 1px solid rgba(255,255,255,0.1);
+}
+.modal-title { font-size: 18px; font-weight: 500; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
+.form-group { margin-bottom: 20px; }
+.form-label { display: block; font-size: 13px; color: var(--color-cloud); margin-bottom: 8px; font-weight: 500; }
+.form-input {
+  width: 100%; padding: 12px 16px; background: var(--surface-panel);
+  border: 1px solid transparent; border-radius: var(--radius-buttons);
+  color: var(--color-bright-white); font-size: 15px; font-family: var(--font-sans);
+  transition: border .2s; outline: none;
+}
+.form-input:focus { border-color: var(--color-spline-blue); }
+.form-input::placeholder { color: var(--color-silver); }
+
+/* Time picker */
+.time-picker-grid {
+  display: flex; gap: 16px; align-items: center; justify-content: center;
+  padding: 16px 0;
+}
+.time-picker-col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.time-picker-value {
+  font-size: 36px; font-weight: 500; font-variant-numeric: tabular-nums;
+  min-width: 80px; text-align: center;
+}
+.time-picker-label { font-size: 12px; color: var(--color-silver); }
+.time-picker-colon { font-size: 28px; color: var(--color-silver); padding-top: 8px; }
+.time-picker-total {
+  text-align: center; font-size: 14px; color: var(--color-cloud);
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.modal-tabs {
+  display: flex; gap: 8px; margin-bottom: 20px;
+  background: var(--surface-panel); border-radius: var(--radius-buttons);
+  padding: 4px;
+}
+.modal-tab {
+  flex: 1; padding: 8px 16px; border: none; background: transparent;
+  color: var(--color-silver); font-size: 13px; font-family: var(--font-sans);
+  cursor: pointer; border-radius: 8px; transition: all .2s; font-weight: 500;
+}
+.modal-tab--active { background: var(--color-spline-blue); color: var(--color-bright-white); }
+
+.modal-footer {
+  display: flex; gap: 12px; justify-content: flex-end;
+  margin-top: 24px; padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.settings-time-row { display: flex; gap: 16px; align-items: center; }
+.settings-time-group { flex: 1; }
+.settings-time-input { display: flex; gap: 4px; }
+.settings-time-input select {
+  flex: 1; padding: 10px 8px; background: var(--surface-panel);
+  border: 1px solid transparent; border-radius: var(--radius-buttons);
+  color: var(--color-bright-white); font-size: 16px; font-family: var(--font-sans);
+  outline: none; text-align: center; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+}
+.settings-time-input select:focus { border-color: var(--color-spline-blue); }
+.settings-time-input select option { background: #111; }
+
+.edit-task-row { display: flex; gap: 12px; align-items: center; }
+.edit-task-row .form-group { flex: 1; margin-bottom: 0; }
+.edit-task-label { font-size: 13px; color: var(--color-silver); margin-bottom: 4px; }
+
+/* ========== Stats View ========== */
+.stats-view { display: none; flex: 1; flex-direction: column; overflow: auto; }
+.stats-view.active { display: flex; }
+.timer-view { display: flex; flex-direction: column; flex: 1; overflow: auto; }
+.timer-view.hidden { display: none; }
+
+.calendar-section {
+  background: var(--surface-panel); border-radius: var(--radius-cards);
+  padding: 24px; margin-bottom: 16px;
+}
+.calendar-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+}
+.calendar-month { font-size: 16px; font-weight: 500; }
+.calendar-nav-btn {
+  background: var(--surface-interactive); border: none; color: var(--color-bright-white);
+  width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
+  transition: all .2s; display: flex; align-items: center; justify-content: center;
+}
+.calendar-nav-btn:hover { background: rgba(255,255,255,0.25); }
+
+.calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 4px; }
+.calendar-weekday { text-align: center; font-size: 11px; color: var(--color-silver); padding: 4px 0; font-weight: 500; }
+
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.calendar-day {
+  aspect-ratio: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; border-radius: var(--radius-smallpanels);
+  cursor: pointer; transition: all .2s; font-size: 13px;
+  position: relative; min-height: 52px;
+}
+.calendar-day:hover { background: var(--surface-hover); }
+.calendar-day--empty { cursor: default; }
+.calendar-day--empty:hover { background: transparent; }
+.calendar-day--today { border: 1px solid var(--color-spline-blue); }
+.calendar-day-num { font-size: 14px; font-weight: 500; }
+.calendar-day-used { font-size: 9px; color: var(--color-silver); margin-top: 1px; white-space: nowrap; }
+
+/* Daily detail popup */
+.daily-detail-popup {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  display: none; align-items: center; justify-content: center;
+  z-index: 1000; backdrop-filter: blur(4px);
+}
+.daily-detail-popup.active { display: flex; }
+.daily-detail-content {
+  background: #111; border-radius: var(--radius-cards);
+  padding: 24px; width: 90%; max-width: 400px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.daily-detail-date { font-size: 16px; font-weight: 500; margin-bottom: 16px; }
+.daily-detail-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 14px;
+}
+.daily-detail-row:last-child { border-bottom: none; }
+.daily-detail-name { flex: 1; }
+.daily-detail-time { font-variant-numeric: tabular-nums; color: var(--color-cloud); }
+.daily-detail-rank { color: var(--color-silver); font-size: 12px; min-width: 24px; }
+.daily-detail-total {
+  display: flex; justify-content: space-between; padding-top: 12px;
+  margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);
+  font-weight: 500; font-size: 15px;
+}
+.daily-detail-mode {
+  font-size: 12px; color: var(--color-silver); margin-bottom: 12px;
+  padding: 4px 10px; border-radius: var(--radius-pills);
+  background: rgba(0,98,255,0.1); display: inline-block;
+}
+
+/* Cumulative stats */
+.cumulative-section {
+  background: var(--surface-panel); border-radius: var(--radius-cards);
+  padding: 20px; margin-bottom: 16px;
+}
+.cumulative-title { font-size: 14px; font-weight: 500; margin-bottom: 16px; color: var(--color-cloud); }
+.cumulative-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 13px;
+}
+.cumulative-row:last-child { border-bottom: none; }
+.cumulative-name { flex: 1; }
+.cumulative-stats { display: flex; gap: 16px; color: var(--color-silver); font-size: 12px; }
+.cumulative-val { font-variant-numeric: tabular-nums; color: var(--color-cloud); }
+
+/* Early end */
+.early-end-area { text-align: center; padding: 16px 0; }
+
+/* End-time confirmation modal */
+.endtime-modal-body {
+  text-align: center; padding: 16px 0;
+}
+.endtime-modal-msg { font-size: 15px; color: var(--color-cloud); margin-bottom: 24px; line-height: 1.6; }
+.endtime-modal-actions { display: flex; flex-direction: column; gap: 12px; }
+
+/* Confirm dialog (generic) */
+.confirm-dialog {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  display: none; align-items: center; justify-content: center;
+  z-index: 3000; backdrop-filter: blur(4px);
+}
+.confirm-dialog.active { display: flex; }
+.confirm-dialog-card {
+  background: #111; border-radius: var(--radius-cards);
+  padding: 32px; width: 90%; max-width: 400px;
+  border: 1px solid rgba(255,255,255,0.1); text-align: center;
+}
+.confirm-dialog-icon { font-size: 40px; margin-bottom: 16px; color: var(--color-golden-orb); }
+.confirm-dialog-msg { font-size: 16px; color: var(--color-cloud); margin-bottom: 24px; line-height: 1.5; }
+.confirm-dialog-actions { display: flex; gap: 12px; justify-content: center; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--surface-interactive); color: var(--color-bright-white);
+  padding: 12px 24px; border-radius: var(--radius-pills);
+  font-size: 13px; z-index: 4000; opacity: 0;
+  transition: opacity .3s; backdrop-filter: blur(8px); pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 40px 24px; color: var(--color-silver); }
+.empty-state i { font-size: 40px; margin-bottom: 16px; opacity: 0.3; }
+.empty-state p { font-size: 14px; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+</style>
+</head>
+<body>
+
+<!-- Welcome Page -->
+<div class="welcome-page active" id="welcomePage">
+  <div class="welcome-mascot">
+    <img src="welcome-v2.png" alt="Timesfile">
+  </div>
+  <button class="welcome-cta-btn" onclick="welcomeBegin()">
+    开启你的时间之旅 <i class="fa-solid fa-arrow-right"></i>
+  </button>
+  </div>
+</div>
+
+<!-- Mode Select Page -->
+<div class="mode-page" id="modePage">
+  <div style="font-size:20px;font-weight:500;margin-bottom:24px;text-align:center">选择今日模式</div>
+
+  <!-- Overtime Mode Card -->
+  <div class="mode-card" id="modeCardOvertime" onclick="selectMode('overtime')">
+    <div class="mode-card-icon">🐂</div>
+    <div class="mode-card-title">牛马模式</div>
+    <div class="mode-card-desc">设定上班与下班时间，精细分配每一段工作时间</div>
+  </div>
+
+  <!-- Efficiency Mode Card -->
+  <div class="mode-card" id="modeCardEfficiency" onclick="selectMode('efficiency')">
+    <div class="mode-card-icon">⚡</div>
+    <div class="mode-card-title">效率模式</div>
+    <div class="mode-card-desc">设定高效时段，在最佳状态集中完成最重要的事</div>
+  </div>
+
+  <!-- Time Settings (shown after mode selection) -->
+  <div id="modeTimeSettings" style="display:none;width:100%;max-width:420px">
+    <div class="mode-time-row">
+      <div class="mode-time-group">
+        <div class="mode-time-label" id="modeStartLabel">上班时间</div>
+        <div class="settings-time-input">
+          <select id="modeStartHour"></select>
+          <span style="color:var(--color-silver);line-height:42px">:</span>
+          <select id="modeStartMin"></select>
+        </div>
+      </div>
+      <div class="mode-time-group">
+        <div class="mode-time-label" id="modeEndLabel">下班时间</div>
+        <div class="settings-time-input">
+          <select id="modeEndHour"></select>
+          <span style="color:var(--color-silver);line-height:42px">:</span>
+          <select id="modeEndMin"></select>
+        </div>
+      </div>
+    </div>
+    <div class="mode-time-error" id="modeTimeError">下班时间必须晚于上班时间，且不允许跨天</div>
+    <div class="mode-pool-info">
+      今日可支配时间 <span class="mode-pool-val" id="modePoolInfo">—</span>
+    </div>
+    <button class="mode-confirm-btn" id="modeConfirmBtn" onclick="confirmMode()">
+      <i class="fa-solid fa-check"></i> 进入 Timesfile
+    </button>
+  </div>
+
+  <button class="mode-back-btn" onclick="modeGoBack()" style="margin-top:28px;font-size:12px;opacity:0.4">
+    <i class="fa-solid fa-chevron-left"></i>
+  </button>
+</div>
+
+<!-- End-time Confirmation Dialog -->
+<div class="confirm-dialog" id="endTimeDialog">
+  <div class="confirm-dialog-card">
+    <div class="confirm-dialog-icon" id="endTimeIcon">⏰</div>
+    <div class="confirm-dialog-msg" id="endTimeMsg"></div>
+    <div class="confirm-dialog-actions">
+      <button class="btn btn-ghost btn-sm" onclick="endTimeDecline()">不需要了</button>
+      <button class="btn btn-primary btn-sm" id="endTimeExtendBtn" onclick="endTimeExtend()">继续</button>
+    </div>
+  </div>
+</div>
+
+<!-- Extend Time Dialog (for choosing additional time) -->
+<div class="modal-overlay" id="extendTimeModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-title" id="extendTimeTitle"><i class="fa-solid fa-clock"></i> 延长工作时间</div>
+    <div class="mode-time-row">
+      <div class="mode-time-group">
+        <div class="mode-time-label" id="extendStartLabel">开始时间</div>
+        <div class="settings-time-input">
+          <select id="extendStartHour"></select>
+          <span style="color:var(--color-silver);line-height:42px">:</span>
+          <select id="extendStartMin"></select>
+        </div>
+      </div>
+      <div class="mode-time-group">
+        <div class="mode-time-label" id="extendEndLabel">结束时间</div>
+        <div class="settings-time-input">
+          <select id="extendEndHour"></select>
+          <span style="color:var(--color-silver);line-height:42px">:</span>
+          <select id="extendEndMin"></select>
+        </div>
+      </div>
+    </div>
+    <div class="mode-time-error" id="extendTimeError">结束时间必须晚于开始时间，只能选择当天剩余时间</div>
+    <div class="mode-pool-info">
+      额外可支配时间 <span class="mode-pool-val" id="extendPoolInfo">—</span>
+    </div>
+    <div style="font-size:12px;color:var(--color-silver);margin-bottom:16px">仅能选择当前时间之后到 23:59 的时间段</div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('extendTimeModal')">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmExtendTime()">确认延长</button>
+    </div>
+  </div>
+</div>
+
+<!-- Early End Confirm Dialog -->
+<div class="confirm-dialog" id="earlyEndDialog">
+  <div class="confirm-dialog-card">
+    <div class="confirm-dialog-icon">🏁</div>
+    <div class="confirm-dialog-msg">确认这么快就结束吗？</div>
+    <div class="confirm-dialog-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('earlyEndDialog')">再想想</button>
+      <button class="btn btn-danger btn-sm" onclick="doEarlyEnd()">确认结束</button>
+    </div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div class="app-container" id="appContainer">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="app-title">
+      <div class="app-logo">
+        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#0062ff"/>
+              <stop offset="100%" style="stop-color:#4d8cff"/>
+            </linearGradient>
+            <linearGradient id="logoSand" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#4d8cff"/>
+              <stop offset="100%" style="stop-color:#ff5cab"/>
+            </linearGradient>
+          </defs>
+          <circle cx="20" cy="20" r="16" fill="none" stroke="url(#logoGrad)" stroke-width="2.5" style="filter:drop-shadow(0 0 4px rgba(0,98,255,0.4))"/>
+          <circle cx="20" cy="20" r="11" fill="rgba(0,98,255,0.06)"/>
+          <path fill="url(#logoSand)" opacity="0.85" d="M14 13 L26 13 L20 20 L26 27 L14 27 L20 20 Z"/>
+          <circle cx="20" cy="20" r="2.5" fill="#ff5cab" style="filter:drop-shadow(0 0 3px rgba(255,92,171,0.6))"/>
+        </svg>
+      </div>
+      <span>Timesfile</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-sm" onclick="toggleStats()" id="btnStats">
+        <i class="fa-solid fa-calendar"></i> 统计
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="openSettings()">
+        <i class="fa-solid fa-gear"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Timer View -->
+  <div class="timer-view" id="timerView">
+
+    <!-- Warning tip -->
+    <div class="warning-tip">
+      😣 过了凌晨小 Time 也要下班，请不要熬夜专注（小 Time 无法跨天计时）
+    </div>
+
+    <!-- Time axis -->
+    <div class="time-axis-section">
+      <div class="time-axis-header">
+        <span class="time-axis-label"><i class="fa-solid fa-hourglass-half"></i> 今日工作时间</span>
+        <span class="time-axis-mode" id="timeAxisMode">牛马模式</span>
+        <span class="time-axis-work-hours" id="workHoursLabel">09:00 — 18:00</span>
+      </div>
+      <div class="time-axis-track">
+        <div class="time-axis-used" id="timeAxisUsed"></div>
+        <div class="time-axis-remaining" id="timeAxisRemaining"></div>
+      </div>
+      <div class="time-axis-stats">
+        <span class="time-axis-stat"><span class="dot dot-dim"></span> 已用 <strong id="usedTimeLabel">0:00</strong></span>
+        <span class="time-axis-stat"><span class="dot dot-blue"></span> 剩余 <strong id="remainTimeLabel">0:00</strong></span>
+        <span class="time-axis-stat"><span class="dot dot-pink"></span> 超时 <strong id="overtimeAxisLabel">0:00</strong></span>
+      </div>
+    </div>
+
+    <!-- Task area -->
+    <div class="task-area-wrapper">
+      <!-- Status tabs at top of task module -->
+      <div class="status-tabs">
+        <button class="status-tab status-tab--active" data-tab="running" onclick="switchTaskTab('running')">
+          执行中<span class="status-tab-count" id="runningCount">0</span>
+        </button>
+        <button class="status-tab" data-tab="pending" onclick="switchTaskTab('pending')">
+          待执行<span class="status-tab-count" id="pendingCount">0</span>
+        </button>
+      </div>
+      <div class="task-section-header">
+        <span class="task-section-title">任务</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="task-count" id="taskCount">0 / 10</span>
+        <!-- Multi-task toggle -->
+        <div class="multitask-inline" style="display:flex;align-items:center;gap:6px;padding:4px 10px;background:var(--surface-panel);border-radius:var(--radius-pills)">
+          <span style="font-size:12px;color:var(--color-cloud);white-space:nowrap">一心多用模式</span>
+          <label class="toggle-switch" style="width:36px;height:20px;flex-shrink:0">
+            <input type="checkbox" id="multiTaskToggle" onchange="toggleMultiTask()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openAddTaskModal()"><i class="fa-solid fa-plus"></i> 添加</button>
+      </div>
+    </div>
+
+    <div class="task-list" id="taskList">
+      <div class="empty-state">
+        <i class="fa-solid fa-list"></i>
+        <p>还没有任务，点击「添加」创建一个</p>
+      </div>
+    </div>
+
+    <!-- Early end -->
+    <div class="early-end-area">
+      <button class="btn btn-ghost btn-sm" onclick="confirmEarlyEnd()">
+        <i class="fa-solid fa-flag"></i> 提前结束今天
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats View -->
+  <div class="stats-view" id="statsView">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <span style="font-size:16px;font-weight:500"><i class="fa-solid fa-calendar"></i> 统计</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="toggleStats()"><i class="fa-solid fa-arrow-left"></i> 返回计时</button>
+      </div>
+    </div>
+
+    <div class="calendar-section">
+      <div class="calendar-nav">
+        <button class="calendar-nav-btn" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+        <span class="calendar-month" id="calendarMonthLabel">2026年7月</span>
+        <button class="calendar-nav-btn" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+      <div class="calendar-weekdays">
+        <span class="calendar-weekday">一</span><span class="calendar-weekday">二</span>
+        <span class="calendar-weekday">三</span><span class="calendar-weekday">四</span>
+        <span class="calendar-weekday">五</span><span class="calendar-weekday">六</span>
+        <span class="calendar-weekday">日</span>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <div class="cumulative-section">
+      <div class="cumulative-title"><i class="fa-solid fa-chart-simple"></i> 累计用时</div>
+      <div id="cumulativeList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Task Modal -->
+<div class="modal-overlay" id="addTaskModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title"><i class="fa-solid fa-plus"></i> 新建任务</div>
+    <div class="form-group">
+      <label class="form-label">任务名称</label>
+      <input class="form-input" id="inputTaskName" placeholder="输入任务名称..." autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">预设时长</label>
+      <div class="modal-tabs">
+        <button class="modal-tab modal-tab--active" data-tab="picker" onclick="switchTab('picker')">选择</button>
+        <button class="modal-tab" data-tab="custom" onclick="switchTab('custom')">自定义</button>
+      </div>
+      <div id="tabPicker">
+        <div class="time-picker-grid">
+          <div class="time-picker-col">
+            <button class="btn btn-ghost btn-sm" onclick="adjustPicker('hours',1)"><i class="fa-solid fa-chevron-up"></i></button>
+            <div class="time-picker-value" id="pickerHours">1</div>
+            <button class="btn btn-ghost btn-sm" onclick="adjustPicker('hours',-1)"><i class="fa-solid fa-chevron-down"></i></button>
+            <div class="time-picker-label">小时</div>
+          </div>
+          <div class="time-picker-colon">:</div>
+          <div class="time-picker-col">
+            <button class="btn btn-ghost btn-sm" onclick="adjustPicker('minutes',5)"><i class="fa-solid fa-chevron-up"></i></button>
+            <div class="time-picker-value" id="pickerMinutes">00</div>
+            <button class="btn btn-ghost btn-sm" onclick="adjustPicker('minutes',-5)"><i class="fa-solid fa-chevron-down"></i></button>
+            <div class="time-picker-label">分钟</div>
+          </div>
+        </div>
+        <div class="time-picker-total" id="pickerTotal">60 分钟</div>
+      </div>
+      <div id="tabCustom" style="display:none">
+        <input class="form-input" id="inputCustomMinutes" type="number" min="1" max="1440" value="60" placeholder="输入分钟数 (1~1440)">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">任务说明 <span style="font-weight:400;color:var(--color-silver);font-size:12px">（选填）</span></label>
+      <textarea class="form-input" id="inputTaskDesc" placeholder="简单描述这个任务..." rows="2" style="resize:vertical"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('addTaskModal')">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmAddTask()">创建</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-title"><i class="fa-solid fa-gear"></i> 工作设置</div>
+    <div class="form-group">
+      <label class="form-label" id="settingsStartLabel">上班时间</label>
+      <div class="settings-time-input">
+        <select id="settingsStartHour"></select>
+        <span style="color:var(--color-silver);line-height:42px">:</span>
+        <select id="settingsStartMin"></select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" id="settingsEndLabel">下班时间</label>
+      <div class="settings-time-input">
+        <select id="settingsEndHour"></select>
+        <span style="color:var(--color-silver);line-height:42px">:</span>
+        <select id="settingsEndMin"></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('settingsModal')">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="saveSettings()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Task Modal -->
+<div class="modal-overlay" id="editTaskModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title"><i class="fa-solid fa-pen"></i> 编辑任务</div>
+    <div class="form-group">
+      <label class="form-label">任务名称</label>
+      <input class="form-input" id="editTaskNameInput" placeholder="输入任务名称...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">预设时长</label>
+      <div class="time-picker-grid">
+        <div class="time-picker-col">
+          <button class="btn btn-ghost btn-sm" onclick="adjustEditPicker('preset','hours',1)"><i class="fa-solid fa-chevron-up"></i></button>
+          <div class="time-picker-value" id="editPresetHours">0</div>
+          <button class="btn btn-ghost btn-sm" onclick="adjustEditPicker('preset','hours',-1)"><i class="fa-solid fa-chevron-down"></i></button>
+          <div class="time-picker-label">小时</div>
+        </div>
+        <div class="time-picker-colon">:</div>
+        <div class="time-picker-col">
+          <button class="btn btn-ghost btn-sm" onclick="adjustEditPicker('preset','minutes',5)"><i class="fa-solid fa-chevron-up"></i></button>
+          <div class="time-picker-value" id="editPresetMinutes">00</div>
+          <button class="btn btn-ghost btn-sm" onclick="adjustEditPicker('preset','minutes',-5)"><i class="fa-solid fa-chevron-down"></i></button>
+          <div class="time-picker-label">分钟</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">实际用时（手动调整）</label>
+      <div class="time-picker-grid">
+        <div class="time-picker-col">
+          <button class="btn btn-ghost btn-sm" onclick="adjustEditPicker('used','hours',1)"><i class="fa-solid fa-chevron-up"></i></button>
+          <div class="time-picker-value" id="editUsedHours">0</div>
+          <button class="btn btn-ghost btn-sm" onclick="adjustEditPicker('used','hours',-1)"><i class="fa-solid fa-chevron-down"></i></button>
+          <div class="time-picker-label">小时</div>
+        </div>
+        <div class="time-picker-colon">:</div>
+        <div class="time-picker-col">
+          <button class="btn btn-ghost btn-sm" onclick="adjustEditPicker('used','minutes',5)"><i class="fa-solid fa-chevron-up"></i></button>
+          <div class="time-picker-value" id="editUsedMinutes">00</div>
+          <button class="btn btn-ghost btn-sm" onclick="adjustEditPicker('used','minutes',-5)"><i class="fa-solid fa-chevron-down"></i></button>
+          <div class="time-picker-label">分钟</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">任务说明 <span style="font-weight:400;color:var(--color-silver);font-size:12px">（选填）</span></label>
+      <textarea class="form-input" id="editTaskDescInput" placeholder="简单描述这个任务..." rows="2" style="resize:vertical"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('editTaskModal')">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmEditTask()">保存</button>
+    </div>
+  </div>
+</div>
+<div class="daily-detail-popup" id="dailyDetailPopup">
+  <div class="daily-detail-content">
+    <div class="daily-detail-date" id="detailDate">2026年7月30日</div>
+    <div id="detailModeInfo"></div>
+    <div id="detailList"></div>
+    <div style="text-align:center;margin-top:16px">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('dailyDetailPopup')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ========== Storage Keys ==========
+const STORAGE_KEYS = {
+  tasks: 'tf21_tasks',
+  runningTaskIds: 'tf21_running_v2',
+  settings: 'tf21_settings_v2',
+  calendar: 'tf21_calendar_v2',
+  migrated: 'tf21_migrated_v2',
+  todayMode: 'tf21_today_mode'  // {modeType, workStart, workEnd, date}
+};
+
+// ========== App State ==========
+let appData = loadData();
+let lastTickTime = null;
+let calendarViewYear, calendarViewMonth;
+let editTaskId = null;
+let pickerState = { hours: 1, minutes: 0, mode: 'picker' };
+let editPickerState = { preset: { hours: 0, minutes: 0 }, used: { hours: 0, minutes: 0 } };
+let statsInitialized = false;
+let currentTaskTab = 'running'; // 'running' | 'pending'
+let endTimeDialogData = null; // { type: 'overtime' | 'efficiency', currentEnd: '' }
+let extendTimeEndSec = 0; // for extend time modal calculation
+let endTimeExtendPending = false; // true while user is extending time (prevents re-popup)
+let _endTimeAlreadyPast = false; // true when app loaded after end time — suppress dialog until user extends
+let _endTimeCheckInterval = null;
+
+function loadData() {
+  try {
+    const tasks = JSON.parse(localStorage.getItem(STORAGE_KEYS.tasks) || '[]');
+    const rawRunningIds = localStorage.getItem(STORAGE_KEYS.runningTaskIds);
+    const runningTaskIds = (!rawRunningIds || rawRunningIds === '__null__') ? [] : JSON.parse(rawRunningIds);
+    const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.settings) || 'null');
+    const calendar = JSON.parse(localStorage.getItem(STORAGE_KEYS.calendar) || '{}');
+    const todayMode = JSON.parse(localStorage.getItem(STORAGE_KEYS.todayMode) || 'null');
+    const multiTaskEnabled = localStorage.getItem('tf21_multitask') === 'true';
+    return { tasks, runningTaskIds, settings, calendar, todayMode, multiTaskEnabled };
+  } catch(e) {
+    return { tasks: [], runningTaskIds: [], settings: null, calendar: {}, todayMode: null, multiTaskEnabled: false };
+  }
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(appData.tasks));
+  localStorage.setItem(STORAGE_KEYS.runningTaskIds,
+    appData.runningTaskIds.length === 0 ? '__null__' : JSON.stringify(appData.runningTaskIds));
+  localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(appData.settings));
+  localStorage.setItem(STORAGE_KEYS.calendar, JSON.stringify(appData.calendar));
+  localStorage.setItem(STORAGE_KEYS.todayMode, JSON.stringify(appData.todayMode));
+  localStorage.setItem('tf21_multitask', appData.multiTaskEnabled ? 'true' : 'false');
+}
+
+function ensureDemoData() {
+  // Already has real data → skip
+  if (Object.keys(appData.calendar).length > 0) return;
+
+  // 1. Try to migrate from v2.0 localStorage (same app data dir)
+  const v2calendar = localStorage.getItem('tf_calendar_v2');
+  if (v2calendar) {
+    try {
+      const v2data = JSON.parse(v2calendar);
+      Object.keys(v2data).forEach(dateStr => {
+        const day = v2data[dateStr];
+        if (!day || !day.tasks) return;
+        // Add description field to each task (v2.0 didn't have it)
+        Object.keys(day.tasks).forEach(tid => {
+          if (!day.tasks[tid].description) day.tasks[tid].description = '';
+        });
+        // Default modeType for v2.0 data
+        if (!day.modeType) day.modeType = 'overtime';
+        appData.calendar[dateStr] = day;
+      });
+      localStorage.setItem('tf21_migrated_v2', 'true');
+      saveData();
+      return;
+    } catch(e) { /* fall through to embedded data */ }
+  }
+
+  // 2. Inject embedded v2.0 historical data (from Time flies DMG)
+  const v2embedded = {"2026-07-29":{"tasks":{"task_1785290848252_is1557":{"name":"personal（r）","usedSeconds":4734,"overtimeSeconds":534,"description":""},"task_1785290904534_gc3znq":{"name":"work","usedSeconds":2791,"overtimeSeconds":0,"description":""},"task_1785290940429_tyk2dr":{"name":"videcoding","usedSeconds":2937,"overtimeSeconds":237,"description":""}},"totalUsedSeconds":10462,"totalOvertimeSeconds":771,"status":"normal","modeType":"overtime"},"2026-07-30":{"tasks":{"task_1785395833161_r674wh":{"name":"💼Work time","usedSeconds":6518,"overtimeSeconds":0,"description":""},"task_1785395881459_256nvv":{"name":"⚙️Videcoding","usedSeconds":7962,"overtimeSeconds":762,"description":""},"task_1785395923750_w5t98o":{"name":"👤Personal","usedSeconds":2893,"overtimeSeconds":0,"description":""},"task_1785395970619_4cydm7":{"name":"🥤GAP time","usedSeconds":3044,"overtimeSeconds":0,"description":""},"task_1785396353852_cdb6no":{"name":"💬chat time","usedSeconds":2998,"overtimeSeconds":0,"description":""}},"totalUsedSeconds":23415,"totalOvertimeSeconds":762,"unallocatedSeconds":7185,"status":"early_end","modeType":"overtime"},"2026-07-31":{"tasks":{"task_1785395833161_r674wh":{"name":"💼Work time","usedSeconds":14240,"overtimeSeconds":5240,"description":""},"task_1785395881459_256nvv":{"name":"⚙️Videcoding","usedSeconds":7317,"overtimeSeconds":117,"description":""},"task_1785395923750_w5t98o":{"name":"👤Personal","usedSeconds":0,"overtimeSeconds":0,"description":""},"task_1785395970619_4cydm7":{"name":"🥤GAP time","usedSeconds":2154,"overtimeSeconds":0,"description":""},"task_1785396353852_cdb6no":{"name":"💬chat time","usedSeconds":2950,"overtimeSeconds":0,"description":""},"task_1785471284860_ti1a9j":{"name":"😴sleep time","usedSeconds":3745,"overtimeSeconds":145,"description":""}},"totalUsedSeconds":30406,"totalOvertimeSeconds":5502,"unallocatedSeconds":1994,"status":"early_end","modeType":"overtime"}};
+  Object.keys(v2embedded).forEach(dateStr => {
+    appData.calendar[dateStr] = v2embedded[dateStr];
+  });
+  saveData();
+}
+
+// ========== Time Utils ==========
+function getTodayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function formatTime(sec) {
+  if (sec < 0) sec = 0;
+  const h = Math.floor(sec/3600);
+  const m = Math.floor((sec%3600)/60);
+  const s = sec%60;
+  if (h>0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function formatShort(sec) {
+  if (sec < 0) sec = 0;
+  const h = Math.floor(sec/3600);
+  const m = Math.floor((sec%3600)/60);
+  if (h>0) return `${h}h${m}m`;
+  return `${m}min`;
+}
+
+function parseHHMM(str) {
+  if (!str) return { h: 9, m: 0 };
+  const p = str.split(':');
+  return { h: parseInt(p[0])||9, m: parseInt(p[1])||0 };
+}
+
+function timeToSeconds(str) {
+  const p = parseHHMM(str);
+  return p.h * 3600 + p.m * 60;
+}
+
+function secondsToHHMM(sec) {
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+
+// ========== Welcome Page ==========
+function welcomeBegin() {
+  document.getElementById('welcomePage').classList.remove('active');
+  document.getElementById('modePage').classList.add('active');
+  resetModeSelection();
+}
+
+function modeGoBack() {
+  document.getElementById('modePage').classList.remove('active');
+  document.getElementById('welcomePage').classList.add('active');
+}
+
+// ========== Mode Selection ==========
+let selectedModeType = null;
+
+function selectMode(type) {
+  selectedModeType = type;
+  document.getElementById('modeCardOvertime').classList.toggle('mode-card--selected', type === 'overtime');
+  document.getElementById('modeCardEfficiency').classList.toggle('mode-card--selected', type === 'efficiency');
+
+  const ts = document.getElementById('modeTimeSettings');
+  ts.style.display = 'block';
+
+  // Update labels
+  if (type === 'overtime') {
+    document.getElementById('modeStartLabel').textContent = '上班时间';
+    document.getElementById('modeEndLabel').textContent = '下班时间';
+  } else {
+    document.getElementById('modeStartLabel').textContent = '贤者开始时间';
+    document.getElementById('modeEndLabel').textContent = '贤者结束时间';
+  }
+
+  // Initialize selects
+  initModeTimeSelects();
+  updateModePool();
+  document.getElementById('modeConfirmBtn').style.display = 'block';
+}
+
+function resetModeSelection() {
+  selectedModeType = null;
+  document.getElementById('modeCardOvertime').classList.remove('mode-card--selected');
+  document.getElementById('modeCardEfficiency').classList.remove('mode-card--selected');
+  document.getElementById('modeTimeSettings').style.display = 'none';
+  document.getElementById('modeConfirmBtn').style.display = 'none';
+  document.getElementById('modeTimeError').style.display = 'none';
+}
+
+function initModeTimeSelects() {
+  ['modeStartHour','modeStartMin','modeEndHour','modeEndMin'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const isMin = id.includes('Min');
+    el.innerHTML = '';
+    for (let i = 0; i < (isMin ? 60 : 24); i += (isMin ? 5 : 1)) {
+      const o = document.createElement('option');
+      o.value = i;
+      o.textContent = String(i).padStart(2, '0');
+      el.appendChild(o);
+    }
+  });
+
+  // Defaults
+  document.getElementById('modeStartHour').value = 9;
+  document.getElementById('modeStartMin').value = 0;
+  document.getElementById('modeEndHour').value = 18;
+  document.getElementById('modeEndMin').value = 0;
+
+  // Add change listeners
+  ['modeStartHour','modeStartMin','modeEndHour','modeEndMin'].forEach(id => {
+    document.getElementById(id).addEventListener('change', updateModePool);
+  });
+}
+
+function updateModePool() {
+  const sh = parseInt(document.getElementById('modeStartHour').value);
+  const sm = parseInt(document.getElementById('modeStartMin').value);
+  const eh = parseInt(document.getElementById('modeEndHour').value);
+  const em = parseInt(document.getElementById('modeEndMin').value);
+
+  const startSec = sh * 3600 + sm * 60;
+  const endSec = eh * 3600 + em * 60;
+  const pool = endSec - startSec;
+  const err = document.getElementById('modeTimeError');
+
+  if (pool <= 0) {
+    err.style.display = 'block';
+    document.getElementById('modeConfirmBtn').disabled = true;
+    document.getElementById('modePoolInfo').textContent = '—';
+    return;
+  }
+  err.style.display = 'none';
+  document.getElementById('modeConfirmBtn').disabled = false;
+  document.getElementById('modePoolInfo').textContent = formatTime(pool);
+}
+
+function confirmMode() {
+  const sh = parseInt(document.getElementById('modeStartHour').value);
+  const sm = parseInt(document.getElementById('modeStartMin').value);
+  const eh = parseInt(document.getElementById('modeEndHour').value);
+  const em = parseInt(document.getElementById('modeEndMin').value);
+  const startSec = sh * 3600 + sm * 60;
+  const endSec = eh * 3600 + em * 60;
+  const pool = endSec - startSec;
+
+  if (pool <= 0) {
+    document.getElementById('modeTimeError').style.display = 'block';
+    return;
+  }
+
+  appData.settings = {
+    modeType: selectedModeType,
+    workStart: `${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}`,
+    workEnd: `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`
+  };
+
+  appData.todayMode = {
+    modeType: selectedModeType,
+    workStart: appData.settings.workStart,
+    workEnd: appData.settings.workEnd,
+    date: getTodayStr()
+  };
+  appData.poolUsedSeconds = 0;
+
+  saveData();
+
+  document.getElementById('modePage').classList.remove('active');
+  document.getElementById('appContainer').classList.add('active');
+  initApp();
+}
+
+// ========== Multi-task Toggle ==========
+function toggleMultiTask() {
+  appData.multiTaskEnabled = document.getElementById('multiTaskToggle').checked;
+
+  if (!appData.multiTaskEnabled && appData.runningTaskIds.length > 1) {
+    // Stop all running tasks
+    doTick();
+    appData.runningTaskIds = [];
+    lastTickTime = null;
+    showToast('一心多用已关闭，所有任务已停止');
+  }
+  saveData();
+}
+
+// ========== Status Tabs ==========
+function switchTaskTab(tab) {
+  currentTaskTab = tab;
+  document.querySelectorAll('.status-tab').forEach(t => {
+    t.classList.toggle('status-tab--active', t.dataset.tab === tab);
+  });
+  renderTasks();
+}
+
+// ========== Settings ==========
+function openSettings() {
+  if (!appData.settings) return;
+  const s = parseHHMM(appData.settings.workStart);
+  const e = parseHHMM(appData.settings.workEnd);
+  document.getElementById('settingsStartHour').value = s.h;
+  document.getElementById('settingsStartMin').value = s.m;
+  document.getElementById('settingsEndHour').value = e.h;
+  document.getElementById('settingsEndMin').value = e.m;
+  document.getElementById('settingsStartLabel').textContent =
+    appData.settings.modeType === 'efficiency' ? '贤者开始时间' : '上班时间';
+  document.getElementById('settingsEndLabel').textContent =
+    appData.settings.modeType === 'efficiency' ? '贤者结束时间' : '下班时间';
+  document.getElementById('settingsModal').classList.add('active');
+  initSettingsSelects();
+}
+
+function initSettingsSelects() {
+  ['settingsStartHour','settingsStartMin','settingsEndHour','settingsEndMin'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const isMin = id.includes('Min');
+    el.innerHTML = '';
+    for (let i = 0; i < (isMin ? 60 : 24); i += (isMin ? 5 : 1)) {
+      const o = document.createElement('option');
+      o.value = i;
+      o.textContent = String(i).padStart(2, '0');
+      el.appendChild(o);
+    }
+  });
+}
+
+function initAllSelects() {
+  initSettingsSelects();
+  initExtendSelects();
+}
+
+function saveSettings() {
+  const sh = parseInt(document.getElementById('settingsStartHour').value);
+  const sm = parseInt(document.getElementById('settingsStartMin').value);
+  const eh = parseInt(document.getElementById('settingsEndHour').value);
+  const em = parseInt(document.getElementById('settingsEndMin').value);
+  const start = `${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}`;
+  const end = `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
+
+  if (sh*60+sm >= eh*60+em) { showToast('结束时间必须晚于开始时间'); return; }
+
+  appData.settings.workStart = start;
+  appData.settings.workEnd = end;
+  if (appData.todayMode) {
+    appData.todayMode.workStart = start;
+    appData.todayMode.workEnd = end;
+  }
+  saveData();
+  closeModal('settingsModal');
+  showToast('工作设置已更新');
+  updateUI();
+}
+
+// ========== Timer Core ==========
+function getTotalWorkSeconds() {
+  if (!appData.settings) return 28800;
+  return timeToSeconds(appData.settings.workEnd) - timeToSeconds(appData.settings.workStart);
+}
+
+function doTick() {
+  if (appData.runningTaskIds.length === 0) return;
+  if (!lastTickTime) { lastTickTime = Date.now(); return; }
+
+  const now = Date.now();
+  const elapsed = Math.floor((now - lastTickTime) / 1000);
+  if (elapsed <= 0) return;
+  lastTickTime = now;
+
+  // Pool deduction: 1 second per wall-clock second, regardless of how many tasks run
+  appData.poolUsedSeconds = (appData.poolUsedSeconds || 0) + elapsed;
+
+  // Each running task deducts its own remainingSeconds
+  appData.runningTaskIds.forEach(id => {
+    const t = appData.tasks.find(x => x.id === id);
+    if (!t) return;
+    if (t.remainingSeconds >= elapsed) {
+      t.remainingSeconds -= elapsed;
+    } else {
+      const overflow = elapsed - t.remainingSeconds;
+      t.remainingSeconds = 0;
+      t.overtimeSeconds += overflow;
+    }
+    t.usedSeconds += elapsed;
+  });
+}
+
+function timerTick() {
+  if (appData.runningTaskIds.length > 0 && lastTickTime && Date.now() - lastTickTime > 3000) {
+    doTick();
+  }
+  doTick();
+  if (appData.runningTaskIds.length > 0) {
+    updateStatusBar();
+    updateRunningCardDisplay();
+    updateTimeAxis();
+  }
+  checkEndTime();
+}
+
+function updateRunningCardDisplay() {
+  appData.runningTaskIds.forEach(id => {
+    const rt = appData.tasks.find(x => x.id === id);
+    if (!rt) return;
+    const card = document.querySelector(`[data-task-id="${rt.id}"]`);
+    if (!card) return;
+    const te = card.querySelector('.card-time');
+    const oe = card.querySelector('.card-overtime');
+    const le = card.querySelector('.card-label');
+    if (te) te.textContent = formatTime(rt.remainingSeconds);
+    if (oe) oe.textContent = rt.overtimeSeconds > 0 ? `超时 ${formatTime(rt.overtimeSeconds)}` : '';
+    if (le) le.textContent = `剩余 / 预设 ${formatTime(rt.presetSeconds)}`;
+  });
+}
+
+// ========== Task Actions ==========
+function startTask(id) {
+  const t = appData.tasks.find(x => x.id === id);
+  if (!t) return;
+
+  if (appData.runningTaskIds.includes(id)) {
+    // Already running → pause
+    pauseTask(id);
+    return;
+  }
+
+  if (!appData.multiTaskEnabled) {
+    // Single task mode: stop current task first
+    if (appData.runningTaskIds.length > 0) {
+      appData.runningTaskIds.forEach(rid => pauseTask(rid));
+    }
+  }
+
+  // Add to running
+  appData.runningTaskIds.push(id);
+  if (!lastTickTime) lastTickTime = Date.now();
+
+  saveData();
+  renderTasks();
+  updateTimeAxis();
+  updateStatusBar();
+}
+
+function pauseTask(id) {
+  if (appData.runningTaskIds.includes(id)) {
+    doTick();
+    appData.runningTaskIds = appData.runningTaskIds.filter(rid => rid !== id);
+    if (appData.runningTaskIds.length === 0) lastTickTime = null;
+    saveData();
+    renderTasks();
+    updateTimeAxis();
+    updateStatusBar();
+  }
+}
+
+function deleteTask(id) {
+  // Pause if running
+  if (appData.runningTaskIds.includes(id)) {
+    appData.runningTaskIds = appData.runningTaskIds.filter(rid => rid !== id);
+    if (appData.runningTaskIds.length === 0) lastTickTime = null;
+  }
+  appData.tasks = appData.tasks.filter(t => t.id !== id);
+  appData.tasks.forEach((t,i) => t.order = i);
+  saveData();
+  renderTasks();
+  updateTimeAxis();
+  updateStatusBar();
+  showToast('任务已删除');
+}
+
+function adjustPreset(id, deltaSec) {
+  const t = appData.tasks.find(x => x.id === id);
+  if (!t) return;
+  const newP = Math.max(60, t.presetSeconds + deltaSec);
+  const diff = newP - t.presetSeconds;
+  t.presetSeconds = newP;
+  let newR = t.remainingSeconds + diff;
+  if (newR < 0) {
+    t.overtimeSeconds += Math.abs(newR);
+    t.remainingSeconds = 0;
+  } else t.remainingSeconds = newR;
+  saveData();
+  renderTasks();
+  updateTimeAxis();
+}
+
+function addTask(name, presetSeconds, desc) {
+  if (appData.tasks.length >= 10) { showToast('最多创建 10 个任务'); return false; }
+  const id = 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+  appData.tasks.push({
+    id, name, presetSeconds,
+    remainingSeconds: presetSeconds,
+    usedSeconds: 0, overtimeSeconds: 0,
+    createdAt: Date.now(), order: appData.tasks.length,
+    dateCreated: getTodayStr(),
+    description: desc || ''
+  });
+  saveData();
+  renderTasks();
+  updateTimeAxis();
+  updateStatusBar();
+  return true;
+}
+
+// ========== Time Axis ==========
+function updateTimeAxis() {
+  if (!appData.settings) return;
+  const totalSec = getTotalWorkSeconds();
+  const poolUsed = appData.poolUsedSeconds || 0;
+  const overtimeSec = appData.tasks.reduce((s,t) => s + t.overtimeSeconds, 0);
+  const remainSec = Math.max(0, totalSec - poolUsed);
+  const isOvertime = poolUsed >= totalSec;
+
+  document.getElementById('workHoursLabel').textContent =
+    `${appData.settings.workStart} — ${appData.settings.workEnd}`;
+
+  const modeEl = document.getElementById('timeAxisMode');
+  if (appData.settings.modeType === 'efficiency') {
+    modeEl.textContent = '效率模式';
+    modeEl.className = 'time-axis-mode efficiency';
+  } else {
+    modeEl.textContent = '牛马模式';
+    modeEl.className = 'time-axis-mode';
+  }
+
+  document.getElementById('usedTimeLabel').textContent = formatTime(poolUsed);
+  document.getElementById('remainTimeLabel').textContent = formatTime(remainSec);
+  document.getElementById('overtimeAxisLabel').textContent = formatTime(overtimeSec);
+
+  const usedEl = document.getElementById('timeAxisUsed');
+  const remainEl = document.getElementById('timeAxisRemaining');
+
+  if (isOvertime) {
+    usedEl.style.width = '100%';
+    usedEl.classList.add('overtime');
+    remainEl.style.width = '0%';
+  } else {
+    const usedPct = Math.round(poolUsed / totalSec * 100);
+    const remainPct = 100 - usedPct;
+    usedEl.style.width = `${usedPct}%`;
+    usedEl.classList.remove('overtime');
+    remainEl.style.width = `${remainPct}%`;
+  }
+}
+
+// ========== Render Tasks ==========
+function renderTasks() {
+  const container = document.getElementById('taskList');
+  if (!container) return;
+
+  const today = getTodayStr();
+  const todayTasks = appData.tasks.filter(t => t.dateCreated === today);
+
+  // Filter by tab
+  let filtered;
+  if (currentTaskTab === 'running') {
+    filtered = todayTasks.filter(t => appData.runningTaskIds.includes(t.id));
+  } else {
+    filtered = todayTasks.filter(t => !appData.runningTaskIds.includes(t.id));
+  }
+
+  // Update tab counts
+  const runningCount = todayTasks.filter(t => appData.runningTaskIds.includes(t.id)).length;
+  const pendingCount = todayTasks.filter(t => !appData.runningTaskIds.includes(t.id)).length;
+  document.getElementById('runningCount').textContent = runningCount;
+  document.getElementById('pendingCount').textContent = pendingCount;
+
+  // Auto-switch to pending tab if no running tasks
+  if (currentTaskTab === 'running' && runningCount === 0 && pendingCount > 0) {
+    switchTaskTab('pending');
+    return; // Re-render with new tab
+  }
+
+  if (filtered.length === 0) {
+    const msg = currentTaskTab === 'running' ? '暂无任务运行' : '没有待执行的任务';
+    container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-list-check"></i><p>${msg}</p></div>`;
+    document.getElementById('taskCount').textContent = `${todayTasks.length} / 10`;
+    return;
+  }
+
+  const sorted = [...filtered].sort((a,b) => a.order - b.order);
+  let html = '';
+  sorted.forEach(t => {
+    const running = appData.runningTaskIds.includes(t.id);
+    const cls = running ? 'card card--running' : 'card card--paused';
+    const otHtml = t.overtimeSeconds > 0 ? `<div class="card-overtime">超时 ${formatTime(t.overtimeSeconds)}</div>` : '';
+    const descHtml = t.description ? `<div class="card-desc">${escHtml(t.description)}</div>` : '';
+    html += `
+    <div class="${cls}" data-task-id="${t.id}">
+      <div class="card-header">
+        <span class="card-name">${escHtml(t.name)}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-time">${formatTime(t.remainingSeconds)}</div>
+        <div class="card-label" data-action="edit" style="cursor:pointer" title="点击编辑">剩余 / 预设 ${formatTime(t.presetSeconds)} <i class="fa-solid fa-pen" style="font-size:10px;opacity:0.4;margin-left:4px"></i></div>
+        ${descHtml}
+        ${otHtml}
+      </div>
+      <div class="card-actions">
+        <div class="adjust-group">
+          <button class="btn-adjust" data-action="adjust" data-delta="-900">-15'</button>
+          <button class="btn-adjust" data-action="adjust" data-delta="-300">-5'</button>
+          <button class="btn-adjust" data-action="adjust" data-delta="+300">+5'</button>
+          <button class="btn-adjust" data-action="adjust" data-delta="+900">+15'</button>
+        </div>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-sm btn-ghost" data-action="edit"><i class="fa-solid fa-pen"></i> 编辑</button>
+          <button class="btn-delete" data-action="delete"><i class="fa-solid fa-trash-can"></i></button>
+        </div>
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+  document.getElementById('taskCount').textContent = `${todayTasks.length} / 10`;
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function updateStatusBar() {
+  const taskList = document.getElementById('taskList');
+  // Remove old status
+  const oldStatus = document.getElementById('inlineTaskStatus');
+  if (oldStatus) oldStatus.remove();
+
+  if (appData.runningTaskIds.length > 0) {
+    const names = appData.runningTaskIds.map(id => {
+      const t = appData.tasks.find(x => x.id === id);
+      return t ? escHtml(t.name) : '';
+    }).filter(Boolean).join('、');
+    const poolUsed = appData.poolUsedSeconds || 0;
+    const statusEl = document.createElement('div');
+    statusEl.id = 'inlineTaskStatus';
+    statusEl.className = 'task-status-running';
+    statusEl.innerHTML = `<i class="fa-solid fa-circle-play"></i> <strong>${names}</strong>（已用 ${formatTime(poolUsed)} / 可支配 ${formatTime(getTotalWorkSeconds())}）`;
+    taskList.insertBefore(statusEl, taskList.firstChild);
+  }
+}
+
+// ========== Event Delegation ==========
+document.addEventListener('click', function(e) {
+  const card = e.target.closest('.card');
+  if (!card) return;
+  const taskId = card.dataset.taskId;
+  const actionEl = e.target.closest('[data-action]');
+  if (actionEl) {
+    const action = actionEl.dataset.action;
+    if (action === 'adjust') {
+      adjustPreset(taskId, parseInt(actionEl.dataset.delta, 10));
+    } else if (action === 'delete') {
+      deleteTask(taskId);
+    } else if (action === 'edit') {
+      openEditTask(taskId);
+    }
+    return;
+  }
+  startTask(taskId);
+});
+
+// ========== Add Task Modal ==========
+function openAddTaskModal() {
+  pickerState = { hours: 1, minutes: 0, mode: 'picker' };
+  updatePickerDisplay();
+  document.getElementById('inputTaskName').value = '';
+  document.getElementById('inputTaskDesc').value = '';
+  document.getElementById('inputCustomMinutes').value = '60';
+  document.getElementById('addTaskModal').classList.add('active');
+  switchTab('picker');
+  setTimeout(() => document.getElementById('inputTaskName').focus(), 100);
+}
+
+function switchTab(mode) {
+  pickerState.mode = mode;
+  document.querySelectorAll('#addTaskModal .modal-tab').forEach(t => {
+    t.classList.toggle('modal-tab--active', t.dataset.tab === mode);
+  });
+  document.getElementById('tabPicker').style.display = mode === 'picker' ? 'block' : 'none';
+  document.getElementById('tabCustom').style.display = mode === 'custom' ? 'block' : 'none';
+  if (mode === 'custom') document.getElementById('inputCustomMinutes').focus();
+}
+
+function updatePickerDisplay() {
+  document.getElementById('pickerHours').textContent = pickerState.hours;
+  document.getElementById('pickerMinutes').textContent = String(pickerState.minutes).padStart(2,'0');
+  document.getElementById('pickerTotal').textContent = `${pickerState.hours*60+pickerState.minutes} 分钟`;
+}
+
+function adjustPicker(target, delta) {
+  if (target === 'hours') pickerState.hours = Math.max(0, Math.min(23, pickerState.hours + delta));
+  else { pickerState.minutes = Math.max(0, Math.min(55, pickerState.minutes + delta)); pickerState.minutes = Math.round(pickerState.minutes/5)*5; }
+  if (pickerState.hours === 0 && pickerState.minutes === 0) pickerState.minutes = 1;
+  updatePickerDisplay();
+}
+
+function confirmAddTask() {
+  const name = document.getElementById('inputTaskName').value.trim();
+  if (!name) { showToast('请输入任务名称'); return; }
+  const desc = document.getElementById('inputTaskDesc').value.trim();
+  let presetSec;
+  if (pickerState.mode === 'picker') {
+    const t = pickerState.hours*60 + pickerState.minutes;
+    if (t < 1) { showToast('请至少设置 1 分钟'); return; }
+    presetSec = t*60;
+  } else {
+    const m = parseInt(document.getElementById('inputCustomMinutes').value, 10);
+    if (isNaN(m) || m < 1 || m > 1440) { showToast('请输入 1~1440 分钟'); return; }
+    presetSec = m*60;
+  }
+  const ok = addTask(name, presetSec, desc);
+  if (ok) closeModal('addTaskModal');
+}
+
+// ========== Edit Task ==========
+function openEditTask(id) {
+  const t = appData.tasks.find(x => x.id === id);
+  if (!t) return;
+  editTaskId = id;
+  document.getElementById('editTaskNameInput').value = t.name;
+  document.getElementById('editTaskDescInput').value = t.description || '';
+  const presetH = Math.floor(t.presetSeconds / 3600);
+  const presetM = Math.floor((t.presetSeconds % 3600) / 60);
+  const usedH = Math.floor(t.usedSeconds / 3600);
+  const usedM = Math.floor((t.usedSeconds % 3600) / 60);
+  editPickerState = { preset: { hours: presetH, minutes: presetM }, used: { hours: usedH, minutes: usedM } };
+  updateEditPickerDisplay('preset');
+  updateEditPickerDisplay('used');
+  document.getElementById('editTaskModal').classList.add('active');
+}
+
+function updateEditPickerDisplay(section) {
+  const st = editPickerState[section];
+  const cap = section.charAt(0).toUpperCase() + section.slice(1);
+  document.getElementById('edit'+cap+'Hours').textContent = st.hours;
+  document.getElementById('edit'+cap+'Minutes').textContent = String(st.minutes).padStart(2,'0');
+}
+
+function adjustEditPicker(section, unit, delta) {
+  const st = editPickerState[section];
+  if (unit === 'hours') st.hours = Math.max(0, Math.min(23, st.hours + delta));
+  else { st.minutes = Math.max(0, Math.min(55, st.minutes + delta)); st.minutes = Math.round(st.minutes/5)*5; }
+  if (section === 'preset' && st.hours === 0 && st.minutes === 0) st.minutes = 1;
+  updateEditPickerDisplay(section);
+}
+
+function confirmEditTask() {
+  const t = appData.tasks.find(x => x.id === editTaskId);
+  if (!t) return;
+  const newName = document.getElementById('editTaskNameInput').value.trim();
+  if (newName) t.name = newName;
+  t.description = document.getElementById('editTaskDescInput').value.trim();
+  const newPre = editPickerState.preset.hours * 3600 + editPickerState.preset.minutes * 60;
+  if (newPre < 60) { showToast('预设时长至少 1 分钟'); return; }
+  const newUsed = editPickerState.used.hours * 3600 + editPickerState.used.minutes * 60;
+  t.presetSeconds = newPre;
+  const diffUsed = newUsed - t.usedSeconds;
+  if (diffUsed > 0) {
+    if (t.remainingSeconds >= diffUsed) t.remainingSeconds -= diffUsed;
+    else { const remaining = t.remainingSeconds; t.remainingSeconds = 0; t.overtimeSeconds += (diffUsed - remaining); }
+    t.usedSeconds = newUsed;
+  } else if (diffUsed < 0) {
+    const absDiff = Math.abs(diffUsed);
+    if (t.overtimeSeconds >= absDiff) { t.overtimeSeconds -= absDiff; t.remainingSeconds = 0; }
+    else { const leftover = absDiff - t.overtimeSeconds; t.overtimeSeconds = 0; t.remainingSeconds = Math.min(t.remainingSeconds + leftover, t.presetSeconds); }
+    t.usedSeconds = newUsed;
+  }
+  if (t.remainingSeconds < 0) { t.overtimeSeconds += Math.abs(t.remainingSeconds); t.remainingSeconds = 0; }
+  saveData();
+  closeModal('editTaskModal');
+  renderTasks();
+  updateTimeAxis();
+  updateStatusBar();
+  showToast('任务已更新');
+}
+
+// ========== End Time Check ==========
+function checkEndTime() {
+  if (!appData.settings || appData.runningTaskIds.length === 0) return;
+  if (endTimeDialogData) return; // Already showing dialog
+  if (endTimeExtendPending) return; // User is in the process of extending time
+  if (_endTimeAlreadyPast) return; // End time was already past when app loaded — wait for user to extend
+
+  const now = new Date();
+  const nowSec = now.getHours()*3600 + now.getMinutes()*60 + now.getSeconds();
+  const endSec = timeToSeconds(appData.settings.workEnd);
+
+  if (nowSec >= endSec) {
+    // Pause all tasks first
+    doTick();
+
+    const type = appData.settings.modeType;
+    endTimeDialogData = { type, currentEnd: appData.settings.workEnd };
+
+    const icon = document.getElementById('endTimeIcon');
+    const msg = document.getElementById('endTimeMsg');
+    const btn = document.getElementById('endTimeExtendBtn');
+
+    if (type === 'efficiency') {
+      icon.textContent = '⚡';
+      msg.textContent = '贤者模式已结束，是否继续高效？';
+      btn.textContent = '继续高效';
+    } else {
+      icon.textContent = '🐂';
+      msg.textContent = '下班时间已到，是否需要加班？';
+      btn.textContent = '继续加班';
+    }
+
+    document.getElementById('endTimeDialog').classList.add('active');
+  }
+}
+
+function endTimeDecline() {
+  document.getElementById('endTimeDialog').classList.remove('active');
+  endTimeDialogData = null;
+  // Auto-settle the day
+  settleDay('normal');
+  showToast('今日已结算');
+}
+
+function endTimeExtend() {
+  document.getElementById('endTimeDialog').classList.remove('active');
+  const data = endTimeDialogData;
+  endTimeDialogData = null;
+  endTimeExtendPending = true; // Prevent re-popup while user sets new time
+  openExtendTimeModal(data.type);
+}
+
+function openExtendTimeModal(type) {
+  const now = new Date();
+  const nowH = now.getHours();
+  const nowM = now.getMinutes();
+
+  // Set current time as minimum start
+  const startH = Math.min(nowH, 22);
+  const startM = Math.max(0, nowH > 22 ? 0 : nowM);
+
+  document.getElementById('extendStartHour').value = startH;
+  document.getElementById('extendStartMin').value = Math.round(startM/5)*5;
+  document.getElementById('extendEndHour').value = 23;
+  document.getElementById('extendEndMin').value = 55;
+
+  if (type === 'efficiency') {
+    document.getElementById('extendTimeTitle').innerHTML = '<i class="fa-solid fa-clock"></i> 延长高效时间';
+    document.getElementById('extendStartLabel').textContent = '贤者开始时间';
+    document.getElementById('extendEndLabel').textContent = '贤者结束时间';
+  } else {
+    document.getElementById('extendTimeTitle').innerHTML = '<i class="fa-solid fa-clock"></i> 加班时间';
+    document.getElementById('extendStartLabel').textContent = '开始时间';
+    document.getElementById('extendEndLabel').textContent = '结束时间';
+  }
+
+  extendTimeEndSec = 23*3600 + 55*60;
+  document.getElementById('extendTimeModal').classList.add('active');
+  updateExtendPool();
+
+  // Add listeners
+  ['extendStartHour','extendStartMin','extendEndHour','extendEndMin'].forEach(id => {
+    const el = document.getElementById(id);
+    el.onchange = function() {
+      updateExtendPool();
+      validateExtendTime();
+    };
+  });
+}
+
+function initExtendSelects() {
+  ['extendStartHour','extendStartMin','extendEndHour','extendEndMin'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const isMin = id.includes('Min');
+    el.innerHTML = '';
+    for (let i = 0; i < (isMin ? 60 : 24); i += (isMin ? 5 : 1)) {
+      const o = document.createElement('option');
+      o.value = i;
+      o.textContent = String(i).padStart(2, '0');
+      el.appendChild(o);
+    }
+  });
+}
+
+function validateExtendTime() {
+  const sh = parseInt(document.getElementById('extendStartHour').value);
+  const sm = parseInt(document.getElementById('extendStartMin').value);
+  const eh = parseInt(document.getElementById('extendEndHour').value);
+  const em = parseInt(document.getElementById('extendEndMin').value);
+  const startSec = sh*3600+sm*60;
+  const endSec = eh*3600+em*60;
+
+  const now = new Date();
+  const nowSec = now.getHours()*3600+now.getMinutes()*60+now.getSeconds();
+
+  const err = document.getElementById('extendTimeError');
+  if (startSec < nowSec-60) {
+    err.textContent = '开始时间不能早于当前时间';
+    err.style.display = 'block';
+    return false;
+  }
+  if (endSec <= startSec) {
+    err.textContent = '结束时间必须晚于开始时间';
+    err.style.display = 'block';
+    return false;
+  }
+  err.style.display = 'none';
+  return true;
+}
+
+function updateExtendPool() {
+  const sh = parseInt(document.getElementById('extendStartHour').value);
+  const sm = parseInt(document.getElementById('extendStartMin').value);
+  const eh = parseInt(document.getElementById('extendEndHour').value);
+  const em = parseInt(document.getElementById('extendEndMin').value);
+  const pool = (eh*3600+em*60) - (sh*3600+sm*60);
+  document.getElementById('extendPoolInfo').textContent = pool > 0 ? formatTime(pool) : '—';
+}
+
+function confirmExtendTime() {
+  if (!validateExtendTime()) return;
+
+  const sh = parseInt(document.getElementById('extendStartHour').value);
+  const sm = parseInt(document.getElementById('extendStartMin').value);
+  const eh = parseInt(document.getElementById('extendEndHour').value);
+  const em = parseInt(document.getElementById('extendEndMin').value);
+
+  // Extend work end time
+  const newEnd = `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
+  const newStart = `${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}`;
+
+  // Update settings
+  appData.settings.workStart = newStart;
+  appData.settings.workEnd = newEnd;
+  if (appData.todayMode) {
+    appData.todayMode.workStart = newStart;
+    appData.todayMode.workEnd = newEnd;
+  }
+
+  saveData();
+  closeModal('extendTimeModal');
+  endTimeExtendPending = false; // Extension confirmed, clear flag
+  _endTimeAlreadyPast = false; // Reset — new end time is in the future, allow re-check
+  showToast('工作时间已延长');
+
+  // Resume running tasks
+  lastTickTime = Date.now();
+  updateUI();
+}
+
+// ========== Stats ==========
+function toggleStats() {
+  const tv = document.getElementById('timerView');
+  const sv = document.getElementById('statsView');
+  if (sv.classList.contains('active')) {
+    sv.classList.remove('active');
+    tv.classList.remove('hidden');
+  } else {
+    tv.classList.add('hidden');
+    sv.classList.add('active');
+    if (!statsInitialized) {
+      const now = new Date();
+      calendarViewYear = now.getFullYear();
+      calendarViewMonth = now.getMonth();
+      statsInitialized = true;
+    }
+    renderCalendar();
+    renderCumulative();
+  }
+}
+
+function changeMonth(delta) {
+  calendarViewMonth += delta;
+  if (calendarViewMonth < 0) { calendarViewMonth = 11; calendarViewYear--; }
+  if (calendarViewMonth > 11) { calendarViewMonth = 0; calendarViewYear++; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const label = document.getElementById('calendarMonthLabel');
+  label.textContent = `${calendarViewYear}年${calendarViewMonth+1}月`;
+
+  const grid = document.getElementById('calendarGrid');
+  const firstDay = new Date(calendarViewYear, calendarViewMonth, 1);
+  const daysInMonth = new Date(calendarViewYear, calendarViewMonth+1, 0).getDate();
+  let startDow = firstDay.getDay() - 1;
+  if (startDow < 0) startDow = 6;
+
+  const today = getTodayStr();
+  let html = '';
+  for (let i = 0; i < startDow; i++) html += '<div class="calendar-day calendar-day--empty"></div>';
+
+  const allEntries = Object.entries(appData.calendar).filter(([d]) => {
+    const p = d.split('-');
+    return parseInt(p[0]) === calendarViewYear && parseInt(p[1]) === calendarViewMonth+1;
+  });
+  const maxUsed = Math.max(...allEntries.map(([,c]) => c.totalUsedSeconds || 0), 1);
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calendarViewYear}-${String(calendarViewMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = dateStr === today;
+    const dayData = appData.calendar[dateStr];
+    const hasData = dayData && dayData.totalUsedSeconds > 0;
+    const totalStr = hasData ? formatShort(dayData.totalUsedSeconds) : '';
+    let bg = '';
+    if (hasData) {
+      const opacity = Math.min(0.35, Math.max(0.04, (dayData.totalUsedSeconds / maxUsed) * 0.35));
+      // Overtime mode: blue; Efficiency mode: violet
+      const color = dayData.modeType === 'efficiency' ? '167,112,255' : '0,98,255';
+      bg = `background:rgba(${color},${opacity})`;
+    }
+
+    html += `<div class="calendar-day${isToday?' calendar-day--today':''}" ${bg ? `style="${bg}"` : ''} onclick="showDayDetail('${dateStr}')">
+      <span class="calendar-day-num">${d}</span>
+      ${hasData ? `<span class="calendar-day-used">${totalStr}</span>` : ''}
+    </div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function showDayDetail(dateStr) {
+  const dayData = appData.calendar[dateStr];
+  const d = new Date(dateStr);
+  document.getElementById('detailDate').textContent = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+
+  // Mode info
+  const modeInfo = document.getElementById('detailModeInfo');
+  if (dayData && dayData.modeType) {
+    const modeLabel = dayData.modeType === 'efficiency' ? '效率模式' : '牛马模式';
+    modeInfo.innerHTML = `<span class="daily-detail-mode">${modeLabel}</span>`;
+  } else {
+    modeInfo.innerHTML = '';
+  }
+
+  const list = document.getElementById('detailList');
+  if (!dayData || !dayData.tasks || Object.keys(dayData.tasks).length === 0) {
+    list.innerHTML = '<div style="padding:16px 0;text-align:center;color:var(--color-silver);font-size:14px">当日无记录</div>';
+    document.getElementById('dailyDetailPopup').classList.add('active');
+    return;
+  }
+
+  const tasksArr = Object.entries(dayData.tasks)
+    .map(([id, td]) => ({ id, name: td.name||id, usedSeconds: td.usedSeconds||0, overtimeSeconds: td.overtimeSeconds||0 }))
+    .sort((a,b) => b.usedSeconds - a.usedSeconds);
+
+  let html = '';
+  tasksArr.forEach((item, idx) => {
+    const medal = idx===0 ? '<i class="fa-solid fa-trophy" style="color:var(--color-golden-orb)"></i>'
+                : idx===1 ? '<i class="fa-solid fa-medal" style="color:var(--color-silver)"></i>'
+                : idx===2 ? '<i class="fa-solid fa-medal" style="color:var(--color-golden-orb);opacity:0.6"></i>'
+                : `<span class="daily-detail-rank">#${idx+1}</span>`;
+    const otHtml = item.overtimeSeconds > 0 ? `<span style="color:var(--color-neon-pink);font-size:12px;margin-left:8px">+${formatShort(item.overtimeSeconds)}</span>` : '';
+    html += `<div class="daily-detail-row">
+      <span style="display:flex;align-items:center;gap:8px"><span>${medal}</span><span class="daily-detail-name">${escHtml(item.name)}</span></span>
+      <span><span class="daily-detail-time">${formatTime(item.usedSeconds)}</span>${otHtml}</span>
+    </div>`;
+  });
+
+  const total = dayData.totalUsedSeconds||0;
+  const overtime = dayData.totalOvertimeSeconds||0;
+  const unallocated = dayData.unallocatedSeconds||0;
+  const status = dayData.status||'normal';
+  html += `<div class="daily-detail-total"><span>合计</span><span>${formatTime(total)}${overtime>0?` <span style="color:var(--color-neon-pink)">(+${formatTime(overtime)})</span>`:''}</span></div>`;
+  if (status === 'early_end') html += `<div style="font-size:12px;color:var(--color-golden-orb);margin-top:8px;text-align:center"><i class="fa-solid fa-flag"></i> 提前结束，未使用 ${formatTime(unallocated)}</div>`;
+
+  list.innerHTML = html;
+  document.getElementById('dailyDetailPopup').classList.add('active');
+}
+
+function renderCumulative() {
+  const el = document.getElementById('cumulativeList');
+  const sorted = [...appData.tasks].sort((a,b) => b.usedSeconds - a.usedSeconds);
+  if (sorted.length === 0) {
+    el.innerHTML = '<div style="padding:16px 0;text-align:center;color:var(--color-silver);font-size:13px">暂无数据</div>';
+    return;
+  }
+  let html = '';
+  sorted.forEach(t => {
+    html += `<div class="cumulative-row">
+      <span class="cumulative-name">${escHtml(t.name)}</span>
+      <span class="cumulative-stats">
+        累计 <span class="cumulative-val">${formatTime(t.usedSeconds)}</span>
+        ${t.overtimeSeconds>0?`超时 <span class="cumulative-val" style="color:var(--color-neon-pink)">${formatTime(t.overtimeSeconds)}</span>`:''}
+      </span>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+
+// ========== Early End ==========
+function confirmEarlyEnd() {
+  var dlg = document.getElementById('earlyEndDialog');
+  if (!dlg) { alert('弹窗元素未找到！'); return; }
+  dlg.style.display = 'flex';
+  dlg.classList.add('active');
+}
+
+function doEarlyEnd() {
+  var dlg = document.getElementById('earlyEndDialog');
+  if (dlg) { dlg.style.display = 'none'; dlg.classList.remove('active'); }
+  doTick();
+  appData.runningTaskIds = [];
+  lastTickTime = null;
+  settleDay('early_end');
+  saveData();
+  showToast('今日已结算');
+
+  // Navigate to stats page
+  setTimeout(() => {
+    toggleStats();
+  }, 800);
+}
+
+function settleDay(status) {
+  const today = getTodayStr();
+  if (!appData.calendar[today]) appData.calendar[today] = {
+    tasks: {}, totalUsedSeconds: 0, totalOvertimeSeconds: 0,
+    unallocatedSeconds: 0, status: 'normal',
+    modeType: appData.settings ? appData.settings.modeType : 'overtime'
+  };
+
+  const cal = appData.calendar[today];
+  cal.modeType = appData.settings ? appData.settings.modeType : 'overtime';
+
+  appData.tasks.forEach(t => {
+    if (!cal.tasks[t.id]) cal.tasks[t.id] = { name: t.name, usedSeconds: 0, overtimeSeconds: 0, description: t.description || '' };
+    cal.tasks[t.id].usedSeconds += t.usedSeconds;
+    cal.tasks[t.id].overtimeSeconds += t.overtimeSeconds;
+    cal.tasks[t.id].description = t.description || '';
+  });
+
+  cal.totalUsedSeconds = appData.poolUsedSeconds || appData.tasks.reduce((s,t) => s + t.usedSeconds, 0);
+  cal.totalOvertimeSeconds = appData.tasks.reduce((s,t) => s + t.overtimeSeconds, 0);
+  cal.unallocatedSeconds = Math.max(0, getTotalWorkSeconds() - cal.totalUsedSeconds);
+  cal.status = status;
+
+  // Reset tasks
+  appData.tasks.forEach(t => { t.remainingSeconds = t.presetSeconds; t.usedSeconds = 0; t.overtimeSeconds = 0; });
+  appData.poolUsedSeconds = 0;
+  saveData();
+  renderTasks();
+  updateTimeAxis();
+  updateStatusBar();
+}
+
+// ========== Modal Helpers ==========
+function closeModal(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('active');
+  // Also reset inline display for dialogs that may have been set directly
+  if (id === 'earlyEndDialog') el.style.display = 'none';
+  if (id === 'extendTimeModal') {
+    endTimeExtendPending = false; // User cancelled extension, allow re-check
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._hide);
+  t._hide = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.active, .daily-detail-popup.active, .confirm-dialog.active').forEach(el => {
+      el.classList.remove('active');
+    });
+    endTimeDialogData = null;
+    var ed = document.getElementById('earlyEndDialog');
+    if (ed) { ed.classList.remove('active'); ed.style.display = 'none'; }
+  }
+  if (document.getElementById('addTaskModal').classList.contains('active') && e.key === 'Enter') confirmAddTask();
+});
+
+// ========== UI Helper ==========
+function updateUI() {
+  updateTimeAxis();
+  updateStatusBar();
+  renderTasks();
+}
+
+// ========== Init ==========
+function initApp() {
+  // Inject demo calendar data if empty (so stats page is never blank)
+  ensureDemoData();
+
+  // Set multi-task toggle
+  document.getElementById('multiTaskToggle').checked = appData.multiTaskEnabled;
+
+  // Suppress end-time dialog if end time already passed on startup
+  if (appData.settings) {
+    const now = new Date();
+    const nowSec = now.getHours()*3600 + now.getMinutes()*60 + now.getSeconds();
+    const endSec = timeToSeconds(appData.settings.workEnd);
+    _endTimeAlreadyPast = (nowSec >= endSec);
+  }
+
+  // 2-second boot buffer to avoid immediate popup
+  endTimeExtendPending = true;
+  setTimeout(() => { endTimeExtendPending = false; }, 2000);
+
+  renderTasks();
+  updateTimeAxis();
+  updateStatusBar();
+
+  setInterval(timerTick, 500);
+  setInterval(() => { if (appData.runningTaskIds.length > 0) saveData(); }, 10000);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { if (appData.runningTaskIds.length > 0) { doTick(); saveData(); } }
+    else if (appData.runningTaskIds.length > 0) { doTick(); updateUI(); }
+  });
+
+  window.addEventListener('focus', () => {
+    if (appData.runningTaskIds.length > 0) { doTick(); updateUI(); }
+  });
+
+  window.addEventListener('beforeunload', () => {
+    if (appData.runningTaskIds.length > 0) { doTick(); saveData(); }
+  });
+}
+
+// ========== V1 Data Migration ==========
+function migrateV1Data() {
+  if (Object.keys(appData.calendar).length > 0) return;
+  const v1Tasks = {
+    'task_1785290848252_is1557': 'personal（r）',
+    'task_1785290904534_gc3znq': 'work',
+    'task_1785290940429_tyk2dr': 'videcoding',
+    'task_1785374689166_ul8kcr': 'GAP'
+  };
+  const v1History = {
+    'task_1785290848252_is1557': { totalUsedSeconds: 4734, totalOvertimeSeconds: 534 },
+    'task_1785290904534_gc3znq': { totalUsedSeconds: 2791, totalOvertimeSeconds: 0 },
+    'task_1785290940429_tyk2dr': { totalUsedSeconds: 2937, totalOvertimeSeconds: 237 }
+  };
+  const dateStr = '2026-07-29';
+  appData.calendar[dateStr] = {
+    tasks: {}, totalUsedSeconds: 0, totalOvertimeSeconds: 0,
+    status: 'normal', modeType: 'overtime'
+  };
+  const cal = appData.calendar[dateStr];
+  Object.entries(v1History).forEach(([id, stats]) => {
+    cal.tasks[id] = { name: v1Tasks[id]||id, usedSeconds: stats.totalUsedSeconds, overtimeSeconds: stats.totalOvertimeSeconds };
+    cal.totalUsedSeconds += stats.totalUsedSeconds;
+    cal.totalOvertimeSeconds += stats.totalOvertimeSeconds;
+  });
+  saveData();
+}
+
+// ========== Bootstrap ==========
+initAllSelects();
+migrateV1Data();
+
+// Determine which page to show
+const now = new Date();
+const nowHour = now.getHours();
+
+if (nowHour >= 5) {
+  // After 5am, always show welcome page
+  document.getElementById('welcomePage').classList.add('active');
+} else {
+  // Before 5am, skip welcome (深夜不需要欢迎页)
+  if (appData.settings) {
+    document.getElementById('appContainer').classList.add('active');
+    initApp();
+  } else {
+    document.getElementById('modePage').classList.add('active');
+  }
+}
+</script>
+</body>
+</html>

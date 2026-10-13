@@ -1,0 +1,51 @@
+{
+  "name": "Timesfile",
+  "productName": "Timesfile",
+  "version": "2.2.0",
+  "description": "你的时间账本 — 多任务倒计时管理，每一秒都值得记录",
+  "main": "main.js",
+  "author": "Timesfile",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.timesfile.app",
+    "productName": "Timesfile",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "dmg": {
+      "title": "Timesfile Installer",
+      "iconSize": 100,
+      "contents": [
+        { "x": 180, "y": 220 },
+        { "x": 480, "y": 220, "type": "link", "path": "/Applications" }
+      ]
+    },
+    "files": [
+      "index.html",
+      "styles.css",
+      "renderer.js",
+      "main.js",
+      "preload.js",
+      "welcome-v2.png",
+      "build/**"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^32.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}
